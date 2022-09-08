@@ -1,0 +1,216 @@
+{% extends 'h1b_layout.html' %}
+{% block js %}
+
+
+
+{% endblock %}
+
+{% block content %}
+
+    <div style="height: 100%;padding: 6px">
+        <div style="width: 100%;height: 40px;background: #FFFFFF;line-height: 26px">
+            <div style="text-align: center">
+                Input Company Name :<input id="componentIdMore" class="mini-textbox" style="width:400px;margin-left: 6px;
+                                            font-weight:bold;font-size:30px;font-color:#0f0f0f;"
+                                            emptyText="Please Input Company Name" />
+                <a class="mini-button" iconCls="icon-search" onclick="onClick">Search</a>
+            </div>
+        </div>
+        <div style="height: calc(100% - 46px);margin-top: 6px">
+            <div style="height: 100%;width: 100%;">
+
+                <div style="height: 460px;background: #FFFFFF;padding: 6px">
+                    <div id="chart_77" class="echart"
+                         style="outline: none;height:100%;background-color: #60A2D7">
+                    </div>
+                </div>
+
+
+                <div style="height:460px ;width: 100%;margin-top: 6px;padding: 6px;background: #FFFFFF;
+                            border-color:#CA9FCA">
+                    <div style="height: 100%;width: 100%;">
+                        <div id="demo_table_more" class="mini-datagrid" style="height:350px;" ;
+                             showPager="true" pageSize="20" virtualScroll="true"  allowResizeColumn="true"
+                             sizeList=[20,50,100] pageSizeWidth="120px">
+                            <div property="columns">
+                                <div type="indexcolumn"></div>
+                                <div field="state" headerAlign="center" allowSort="true">STATE</div>
+                                <div field="soc_name" headerAlign="center" allowSort="true">SOC_NAME</div>
+                                <div field="naics" headerAlign="center" allowSort="true">NAICS</div>
+                                <div field="comp1" headerAlign="center" allowSort="true">COMP1</div>
+                                <div field="year" headerAlign="center" allowSort="true">YEAR</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var dataResult = {};
+        mini.parse()
+        var grid = mini.get('demo_table_more');
+        function onClick(e) {
+            var button = e.sender;
+            var textEdit = mini.get('componentIdMore');
+            var text = textEdit.getText();
+            var myChart = echarts.init(document.getElementById('chart_77'));
+            const colors = ['#5470C6', '#EE6666'];
+            option = {
+                color: colors,
+                tooltip: {
+                    trigger: 'none',
+                    axisPointer: {
+                        type: 'cross'
+                    }
+                },
+                legend: {},
+                grid: {
+                    top: 70,
+                    bottom: 50
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisTick: {
+                            alignWithLabel: true
+                        },
+                        axisLine: {
+                            onZero: false,
+                            lineStyle: {
+                                color: colors[1]
+                            }
+                        },
+                        axisPointer: {
+                            label: {
+                                formatter: function (params) {
+                                    return (
+                                        'Precipitation  ' +
+                                        params.value +
+                                        (params.seriesData.length ? '：' + params.seriesData[0].data : '')
+                                    );
+                                }
+                            }
+                        },
+                        // prettier-ignore  日期 后台数据
+                        data: []
+                    },
+                    {
+                        type: 'category',
+                        axisTick: {
+                            alignWithLabel: true
+                        },
+                        axisLine: {
+                            onZero: false,
+                            lineStyle: {
+                                color: colors[0]
+                            }
+                        },
+                        axisPointer: {
+                            label: {
+                                formatter: function (params) {
+                                    return (
+                                        'Precipitation  ' +
+                                        params.value +
+                                        (params.seriesData.length ? '：' + params.seriesData[0].data : '')
+                                    );
+                                }
+                            }
+                        },
+                        // prettier-ignore  后台数据
+                        data: []
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name: 'real',
+                        type: 'line',
+                        xAxisIndex: 1,
+                        smooth: true,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        //后台数据
+                        data: []
+                    },
+                    {
+                        name: 'pred',
+                        type: 'line',
+                        smooth: true,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        //后台数据
+                        data: []
+                    }
+                ],
+            }
+            mini.mask({
+                el: document.body,
+                cls: 'mini-mask-loading',
+                html: 'Load...'
+            })
+            $.ajax({
+                url: "/get_selected_companyID_more/",
+                type: "post",
+                data: {
+                    selected: text,
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    mini.unmask()
+                    //将后台返回的数据更新到option中
+                    console.log("000000000  into get_selected_companyID_more", res)
+                    if (res.status) {
+                        option.xAxis[0].data = res.series.year;
+                        option.xAxis[1].data = res.series.year;
+                        option.series[0].data = res.series.pro;
+                        option.series[1].data = res.series.real;
+                        myChart.setOption(option);
+
+                        dataResult = mini.decode(res.text);
+                        // 第一次设置
+                        fillDataMore(0, grid.getPageSize(), dataResult, grid);
+
+                        // 使用刚指定的配置项和数据显示图表。
+                        // window.addEventListener("resize", function () {
+                        //      myChart.resize();
+                    }
+                }
+            });
+        }
+
+             // 分页填充细节处理
+            function fillDataMore(pageIndex, pageSize, dataResult, grid) {
+                console.log("into fillData",pageIndex, pageSize, dataResult)
+                var data = dataResult.lists;
+                var totalCount = dataResult.total;
+                console.log("----",data);
+                var arr = [];
+                var start = pageIndex * pageSize, end = start + pageSize;
+                for (var i = start, l = end; i < l; i++) {
+                        var record = data[i];
+                        if (!record) continue;
+                            arr.push(record);
+                }
+
+                grid.setTotalCount(totalCount);
+                grid.setPageIndex(pageIndex);
+                grid.setPageSize(pageSize);
+                grid.setData(arr);
+            }
+
+            // 监听分页前事件，阻止后自行设置当前数据和分页信息
+            grid.on("beforeload", function (e) {
+                e.cancel = true;
+                var pageIndex = e.data.pageIndex, pageSize = e.data.pageSize;
+                fillDataMore(pageIndex, pageSize, dataResult, grid);
+            });
+    </script>
+{% endblock %}

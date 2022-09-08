@@ -1,0 +1,195 @@
+{% extends 'index_layout.html' %}
+{% block content %}
+    <div id = "mygreen">
+            <div style="text-align: center">
+                Select SOC :<input id="componentSocId" class="mini-combobox"
+                                     style="width:400px;margin-left: 6px"
+                                     tex tField="text"
+                                     valueField="id" emptyText="请选择..."
+                                     required="true" allowInput="true"
+                                     showNullItem="true" nullItemText="请选择..."/>
+            </div>
+
+        <div id="mypic1">
+        <p><span>SOC H1b</span></p>
+            <div id="chart_44" class="echart" style="outline: none;height:100%;background-color: #d3d2b4">
+            </div>
+    </div>
+        <div id="mypic2">
+            <p><span>Average Wage</span></p>
+            <div id="chart_55" class="echart" style="outline: none;height:100%;background-color: #d3d2b4;" >
+            </div>
+    </div>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            echart_44();
+            echart_55();
+        })
+
+        function echart_44() {
+            // 基于准备好的dom，初始化echarts实例
+            var myChartCount = echarts.init(document.getElementById('chart_44'));
+            const colors = ['#5470C6', '#EE6666'];
+            var optionCount;
+            optionCount = {
+                xAxis: {
+                    type: 'category',
+                    data: [] //年
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        data: [],
+                        type: 'line',
+                        smooth: true
+                    }
+                ]
+            };
+            $.ajax({
+                url: '/h1b/occupation/chart/',
+                type: 'get',
+                dataType: 'json',
+                success: function (res) {
+                    //将后台返回的数据更新到option中
+                    if (res.status) {
+                        optionCount.xAxis.data = res.series.year;
+                        optionCount.series[0].data = res.series.data1;
+                        myChartCount.setOption(optionCount);
+                    }
+                }
+            })
+            // 使用刚指定的配置项和数据显示图表。
+            window.addEventListener("resize", function () {
+                myChartCount.resize();
+            });
+        }
+
+        function echart_55() {
+            // 基于准备好的dom，初始化echarts实例
+            var myChartWage = echarts.init(document.getElementById('chart_55'));
+            const colors = ['#5470C6', '#EE6666'];
+            var option;
+            option = {
+                xAxis: {
+                    type: 'category',
+                    data: []
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        data: [],
+                        type: 'bar'
+                    }
+                ]
+            };
+
+            $.ajax({
+                url: '/h1b/occupation/chart/',
+                type: 'get',
+                dataType: 'json',
+                success: function (res) {
+                    //将后台返回的数据更新到option中
+                    if (res.status) {
+                        option.xAxis.data = res.series.year;
+                        option.series[0].data = res.series.data2;
+                        myChartWage.setOption(option);
+                    }
+                }
+            })
+            // 使用刚指定的配置项和数据显示图表。
+            window.addEventListener("resize", function () {
+                myChartWage.resize();
+            });
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: "/get_soc_company/",
+                type: "post",
+                data: {},
+                usr: 2,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    var _data = []
+                    _data = data.data.map(item => {
+                        return {id: item.id, text: item.name}
+                    })
+                    mini.get('componentSocId').setData(_data)
+                }
+            });
+        });
+
+        mini.parse()
+        mini.get('componentSocId').on('valuechanged', function (e) {
+            // 基于准备好的dom，初始化echarts实例
+            console.log("eeeeeeeeeeeeeee=", e.selected.text)
+            var myChartCount = echarts.init(document.getElementById('chart_44'));
+            var myChartWage = echarts.init(document.getElementById('chart_55'));
+            const colors = ['#5470C6', '#EE6666'];
+            var optionCount;
+            var optionWage;
+            optionCount = {
+                xAxis: {
+                    type: 'category',
+                    data: [] //年
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        data: [],
+                        type: 'line',
+                        smooth: true
+                    }
+                ]
+            };
+            optionWage = {
+                xAxis: {
+                    type: 'category',
+                    data: []
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        data: [],
+                        type: 'bar'
+                    }
+                ]
+            };
+            $.ajax({
+                url: "/get_selected_soc/",
+                type: "post",
+                data: {selected: e.selected.text},
+                dataType: "JSON",
+                success: function (res) {
+                    //将后台返回的数据更新到option中
+                    if (res.status) {
+                        optionCount.xAxis.data = res.series.year;
+                        optionCount.series[0].data = res.series.data1;
+                        myChartCount.setOption(optionCount);
+                        // 使用刚指定的配置项和数据显示图表。
+                        window.addEventListener("resize", function () {
+                            myChartCount.resize();
+                        });
+                        optionWage.xAxis.data = res.series.year;
+                        optionWage.series[0].data = res.series.data2;
+                        myChartWage.setOption(optionWage);
+                        window.addEventListener("resize", function () {
+                            myChartWage.resize();
+                        });
+                    }
+                }
+            })
+        })
+    </script>
+{% endblock %}

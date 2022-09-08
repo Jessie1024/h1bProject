@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .box{
+            width: 500px;
+            height: 500px;
+            background-color: rgb(188, 227, 236);
+        }
+    </style>
+    <script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script src="{% static 'js/echarts.common.min.js' %}"></script>
+    <script>
+
+    function echart_11() {
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('chart_11'));
+    //var xDataArr = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+    //var yDataArr = [3000, 2800, 900, 1000, 800, 700, 1400, 1300, 900, 1000, 800, 600]
+    option = {
+    xAxis:{
+    type:'category',
+        data: {{ xDataArr|safe }}
+    },
+    yAxis:{
+    type:'value'
+    },
+    series:[
+    {
+    type:'line',
+    data:{{ yDataArr|safe }}
+    }
+    ]
+    };
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+    window.addEventListener("resize", function () {
+    myChart.resize();
+    });
+    }
+    </script>
+</head>
+<body>
+<div class="t_container">
+
+    <div id="chart_11" class="echart" style="width: 600px; height: 400px; position: absolute; top: 100px; left: 550px; background-color: #60A2D7"></div>
+    <script>
+        echart_11();
+    </script>
+</div>
+
+</script>
+
+</body>
+</html>

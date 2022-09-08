@@ -1,0 +1,207 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap-theme.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap-select.min.css' %}">
+
+    <script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script src="{% static 'js/echarts.common.min.js' %}"></script>
+    <script src="{% static 'plugins/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'plugins/bootstrap/js/bootstrap-select.min.js' %}"></script>
+    <script>
+    function echart_11() {
+
+    // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('chart_11'));
+        const colors = ['#5470C6', '#EE6666'];
+        option = {
+            color: colors,
+            tooltip: {
+                trigger: 'none',
+                axisPointer: {
+                    type: 'cross'
+                }
+            },
+            legend: {},
+            grid: {
+                top: 70,
+                bottom: 50
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    axisTick: {
+                        alignWithLabel: true
+                    },
+                    axisLine: {
+                        onZero: false,
+                        lineStyle: {
+                            color: colors[1]
+                        }
+                    },
+                    axisPointer: {
+                        label: {
+                            formatter: function (params) {
+                                return (
+                                    'Precipitation  ' +
+                                    params.value +
+                                    (params.seriesData.length ? '：' + params.seriesData[0].data : '')
+                                );
+                            }
+                        }
+                    },
+                    // prettier-ignore
+                    data: ['2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021']
+                },
+                {
+                    type: 'category',
+                    axisTick: {
+                        alignWithLabel: true
+                    },
+                    axisLine: {
+                        onZero: false,
+                        lineStyle: {
+                            color: colors[0]
+                        }
+                    },
+                    axisPointer: {
+                        label: {
+                            formatter: function (params) {
+                                return (
+                                    'Precipitation  ' +
+                                    params.value +
+                                    (params.seriesData.length ? '：' + params.seriesData[0].data : '')
+                                );
+                            }
+                        }
+                    },
+                    // prettier-ignore
+                    data: ['2015-1', '2015-2', '2015-3', '2015-4', '2015-5', '2015-6', '2015-7', '2015-8', '2015-9', '2015-10', '2015-11', '2015-12']
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value'
+                }
+            ],
+            series: [
+                {
+                    name: 'Precipitation(2015)',
+                    type: 'line',
+                    xAxisIndex: 1,
+                    smooth: true,
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [
+                        2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3
+                    ]
+                },
+                {
+                    name: 'Precipitation(2016)',
+                    type: 'line',
+                    smooth: true,
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [
+                        3.9, 5.9, 11.1, 18.7, 48.3, 69.2, 231.6, 46.6, 55.4, 18.4, 10.3, 0.7
+                    ]
+                }
+            ]
+        };
+
+    // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+        window.addEventListener("resize", function () {
+        myChart.resize();
+        });
+    }
+    </script>
+
+    <script>
+        $('.selectpicker').selectpicker({
+            noneSelectedText: '',
+            noneResultsText: '',
+            liveSearch: true,
+            size:5   //设置select⾼度，同时显⽰5个值
+        });
+        $(window).on('load', function () {
+            var sid = $("#select_article").val();
+            $('.selectpicker').selectpicker('val', '');
+            $('.selectpicker').selectpicker('refresh');
+            $.ajax({
+                method:'POST',
+                url:'get_items',
+                dataType:'json',
+                success: function (res) {
+                    var html="<option value='0'>请选择物品</option>";
+                    console.log(res);
+                    for (var i = 0; i < res.content.length; i++) {
+                        if (sid == res.content[i].tid) {
+                            html += "<option  value='" + res.content[i].tid + "' selected='selected' data-name='"+res.content[i].name+"'>" + res.content[i].name + "</option>";
+                        } else {
+                            html += "<option  value='" + res.content[i].tid + "' data-name='"+res.content[i].name+"'>"+ res.content[i].name + "</option>";
+                        }
+                    }
+                    $("#select_article").html(html);
+                    $('.selectpicker').selectpicker('refresh');//加载select框选择器
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+
+
+
+
+
+<div class="container">
+
+
+
+    <select class="selectpicker show-tick" style="outline: none;width:200px;" data-live-search="true" id="select_article" name="select_article">
+        <option value="" data-name="">请选择物品</option>
+    </select>
+
+    <!--div class="row form-group">
+        <div class="col-lg-2"></div>
+        <div class="form-group col-lg-8" >
+            <label class="input-group">
+                <span class="input-group-addon">公司名称：</span>
+                <select class="col-lg-6 form-control"  id="userName" name="name"
+                        data-live-search="true">
+                    <option>Mustard</option>
+                    <option>Ketchup</option>
+                    <option>Relish</option>
+                </select>
+            </label>
+        </div>
+    </div-->
+    <script>
+        $(function () {
+            //初始化select
+            $("#userName").selectpicker({
+                'selectedText': 'cat'
+            });
+        })
+    </script>
+       <!--select class="selectpicker" data-live-search="true" style="outline: none;width:200px;height: 50px;
+position: absolute; top: 30px; left: 0px; id="select_company" name="select_company"">
+        <option>Mustard</option>
+        <option>Ketchup</option>
+        <option>Relish</option>
+    </select-->
+    <div id="chart_11" class="echart" style="width: 1200px; height: 800px; position: absolute; top: 200px; left: 300px; background-color: #60A2D7"></div>
+    <script>
+        echart_11();
+    </script>
+</div>
+
+</body>
+</html>

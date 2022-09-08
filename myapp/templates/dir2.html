@@ -1,0 +1,24 @@
+{% extends 'index_layout.html' %}
+{% block content %}
+<style>
+h1 {text-align: center;}
+</style>
+    <div id="home" class="mini-layout" style="width:100%;height=100%;">
+        <div region="center">
+            <h1> How to understand the result</h1>
+            <br>
+            <dl>
+                <dt> In the section "H1B by occupation/Industry", you can find the previous 10 years of H1B approval data and salary by occupation and
+                industry. If you are not sure which occupation or the industry your title or the company belongs to, the occupation code
+                we use here is 2018 SOC, here are some helpful websites to research on:
+                    <a href="https://www.bls.gov/soc/ " target="_blank"> SOC source</a>;
+                    <a href="https://www.hoosierdata.in.gov/coder/#:~:text=The%20Standard%20Occupational%20Classification%20(SOC,Codes%20online%20using%20this%20website. " target="_blank">  Find my SOC </a>
+                    <br>
+                Similarly, the industry code we use here is 2017 NAICS, here is a useful website:
+                    <a href=https://www.census.gov/naics/" target="_blank"> NAIC source</a>
+                </dt>
+            </dl>
+        </div>
+    </div>
+
+{% endblock %}

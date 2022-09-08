@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>H1B Statistics</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap-theme.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap-select.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+
+    <script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script src="{% static 'miniui/scripts/boot.js' %}"></script>
+    <script src="{% static 'js/echarts.common.min.js' %}"></script>
+    <script src="{% static 'plugins/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'plugins/bootstrap/js/bootstrap-select.js' %}"></script>
+    <style type="text/css">
+        body{
+            font-size: 20px;
+        }
+        #nav-header{display:block;
+		width:100%;
+		font-weight:bold;
+		font-size:30px;
+		font-color:#0f0f0f;
+		background-color:#7eadd9;
+		text-align:left;
+		padding:4px;
+		text-decoration:non2;
+		text-transform:uppercase;}
+        a:hover,a:active{font-color:#ff0000;}
+    </style>
+
+</head>
+<body>
+<div style="width: 100%;height: 100%;">
+    <div style="width: 100%;">
+            <nav class="navbar-default" role="navigation">
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav" id="nav-header">
+                        <li><a href="/h1b_home/">Home</a></li>
+                        <li><a href="/h1b_list/">Sponsor</a></li>
+                        <li><a href="/h1b_list_more/">Sponsor More</a></li>
+                        <li><a href="/h1b_industry/">Wage by industry</a></li>
+                        <li><a href="/h1b_occupation/">Wage by occupation</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                        <li class="divider"></li>
+                    </ul>
+                    </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    <div style="height: calc(100% - 150px) ;z-index: 100">
+        {% block content %}--{% endblock %}
+    </div>
+    <nav class=" navbar-default navbar-fixed-bottom" style="z-index: 99">
+        <div  style="width: 100%" >
+            <H3 style="text-align: center">
+                <address>
+                    <strong>
+                        For Questions
+                        <a href="mailto:#">first.last@example.com</a>
+                    </strong><br>
+                </address>
+            </H3>
+        </div>
+    </nav>
+</body>
+</html>
+
+<style>
+    body{
+        height: 100%;
+    }
+</style>

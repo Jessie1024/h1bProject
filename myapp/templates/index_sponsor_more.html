@@ -1,0 +1,200 @@
+{% extends 'index_layout.html' %}
+{% block content %}
+    <div id = "mygreen">
+            <div style="text-align: center">
+                Input Company Name :<input id="componentIdMore" class="mini-textbox" style="width:400px;margin-left: 6px;
+                                            font-weight:bold;font-color:#0f0f0f;"
+                                            emptyText="Please Input Company Name" />
+                <a class="mini-button" iconCls="icon-search" onclick="onClick">Search</a>
+            </div>
+
+        <div id="mypic7">
+            <p><span>Sponsor H1b</span></p>
+                <div id="chart_77" class="echart" style="outline: none;height:100%;background-color: #d3d2b4">
+                </div>
+        </div>
+
+        <div id="mypic8">
+            <p><span>Average Wage</span></p>
+                <div id="demo_table_more" class="mini-datagrid"  showPager="true" pageSize="20" virtualScroll="false"
+                     allowResizeColumn="true"  sizeList="[20,50,100]" pageSizeField="Total" pageIndexField="Total"
+                     style="height:100%;width:100%;font:bold 11px/21px Arial, Helvetica, sans-serif;" >
+                            <div property="columns">
+                                <div type="indexcolumn" width="10" ></div>
+                                <div field="comp1" width="60" headerAlign="center" allowSort="true">Company Name</div>
+                                <div field="soc_name" width="60" headerAlign="center" allowSort="true">Titie</div>
+                                <div field="wage" width="20" headerAlign="center" allowSort="true">Wage</div>
+                                <div field="state" width="20" headerAlign="center" allowSort="true">State</div>
+                                <div field="year" width="20" headerAlign="center" allowSort="true">Year</div>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var dataResult = {};
+        mini.parse()
+        var grid = mini.get('demo_table_more');
+        function onClick(e) {
+            var button = e.sender;
+            var textEdit = mini.get('componentIdMore');
+            var text = textEdit.getText();
+            var myChart = echarts.init(document.getElementById('chart_77'));
+            const colors = ['#5470C6', '#EE6666'];
+            option = {
+                color: colors,
+                tooltip: {
+                    trigger: 'none',
+                    axisPointer: {
+                        type: 'cross'
+                    }
+                },
+                legend: {},
+                grid: {
+                    top: 70,
+                    bottom: 50
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisTick: {
+                            alignWithLabel: true
+                        },
+                        axisLine: {
+                            onZero: false,
+                            lineStyle: {
+                                color: colors[1]
+                            }
+                        },
+                        axisPointer: {
+                            label: {
+                                formatter: function (params) {
+                                    return (
+                                        'Estimated Cases  ' +
+                                        params.value +
+                                        (params.seriesData.length ? '：' + params.seriesData[0].data : '')
+                                    );
+                                }
+                            }
+                        },
+                        // prettier-ignore  日期 后台数据
+                        data: []
+                    },
+                    {
+                        type: 'category',
+                        axisTick: {
+                            alignWithLabel: true
+                        },
+                        axisLine: {
+                            onZero: false,
+                            lineStyle: {
+                                color: colors[0]
+                            }
+                        },
+                        axisPointer: {
+                            label: {
+                                formatter: function (params) {
+                                    return (
+                                        'H1B Approval Cases  ' +
+                                        params.value +
+                                        (params.seriesData.length ? '：' + params.seriesData[0].data : '')
+                                    );
+                                }
+                            }
+                        },
+                        // prettier-ignore  后台数据
+                        data: []
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name: 'real',
+                        type: 'line',
+                        xAxisIndex: 1,
+                        smooth: true,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        //后台数据
+                        data: []
+                    },
+                    {
+                        name: 'pred',
+                        type: 'line',
+                        smooth: true,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        //后台数据
+                        data: []
+                    }
+                ],
+            }
+            mini.mask({
+                el: document.body,
+                cls: 'mini-mask-loading',
+                html: 'Load...'
+            })
+            $.ajax({
+                url: "/get_selected_companyID_more/",
+                type: "post",
+                data: {
+                    selected: text,
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    mini.unmask()
+                    //将后台返回的数据更新到option中
+                    console.log("000000000  into get_selected_companyID_more", res)
+                    if (res.status) {
+                        option.xAxis[0].data = res.series.year;
+                        option.xAxis[1].data = res.series.year;
+                        option.series[0].data = res.series.pro;
+                        option.series[1].data = res.series.real;
+                        myChart.setOption(option);
+
+                        dataResult = mini.decode(res.text);
+                        // 第一次设置
+                        fillDataMore(0, grid.getPageSize(), dataResult, grid);
+
+                        // 使用刚指定的配置项和数据显示图表。
+                        // window.addEventListener("resize", function () {
+                        //      myChart.resize();
+                    }
+                }
+            });
+        }
+
+             // 分页填充细节处理
+            function fillDataMore(pageIndex, pageSize, dataResult, grid) {
+                console.log("into fillData",pageIndex, pageSize, dataResult)
+                var data = dataResult.lists;
+                var totalCount = dataResult.total;
+                console.log("----",data);
+                var arr = [];
+                var start = pageIndex * pageSize, end = start + pageSize;
+                for (var i = start, l = end; i < l; i++) {
+                        var record = data[i];
+                        if (!record) continue;
+                            arr.push(record);
+                }
+
+                grid.setTotalCount(totalCount);
+                grid.setPageIndex(pageIndex);
+                grid.setPageSize(pageSize);
+                grid.setData(arr);
+            }
+
+            // 监听分页前事件，阻止后自行设置当前数据和分页信息
+            grid.on("beforeload", function (e) {
+                e.cancel = true;
+                var pageIndex = e.data.pageIndex, pageSize = e.data.pageSize;
+                fillDataMore(pageIndex, pageSize, dataResult, grid);
+            });
+    </script>
+{% endblock %}

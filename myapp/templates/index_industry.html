@@ -1,0 +1,196 @@
+{% extends 'index_layout.html' %}
+{% block content %}
+    <div id = "mygreen">
+            <div style="text-align: center">
+                Select NAICS :<input id="componentNaicsId" class="mini-combobox"
+                                     style="width:400px;margin-left: 6px"
+                                     tex tField="text"
+                                     valueField="id" emptyText="请选择..."
+                                     required="true" allowInput="true"
+                                     showNullItem="true" nullItemText="请选择..."/>
+            </div>
+
+        <div id="mypic3">
+            <p><span>Naics H1b</span></p>
+                <div id="chart_22" class="echart" style="outline: none;height:100%;background-color: #d3d2b4">
+                </div>
+        </div>
+        <div id="mypic4">
+            <p><span>Average Wage</span></p>
+            <div id="chart_33" class="echart" style="outline: none;height:100%;background-color: #d3d2b4;" >
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            echart_22();
+            echart_33();
+        })
+
+        function echart_22() {
+            // 基于准备好的dom，初始化echarts实例
+            var myChartCount = echarts.init(document.getElementById('chart_22'));
+            const colors = ['#5470C6', '#EE6666'];
+            var optionCount;
+            optionCount = {
+                xAxis: {
+                    type: 'category',
+                    data: [] //年
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        data: [],
+                        type: 'line',
+                        smooth: true
+                    }
+                ]
+            };
+            $.ajax({
+                url: '/h1b/industry/chart/',
+                type: 'get',
+                dataType: 'json',
+                success: function (res) {
+                    //将后台返回的数据更新到option中
+                    if (res.status) {
+                        optionCount.xAxis.data = res.series.year;
+                        optionCount.series[0].data = res.series.data1;
+                        myChartCount.setOption(optionCount);
+                    }
+                }
+            })
+            // 使用刚指定的配置项和数据显示图表。
+            window.addEventListener("resize", function () {
+                myChartCount.resize();
+            });
+        }
+
+        function echart_33() {
+            // 基于准备好的dom，初始化echarts实例
+            var myChartWage = echarts.init(document.getElementById('chart_33'));
+            const colors = ['#5470C6', '#EE6666'];
+            var option;
+            option = {
+                xAxis: {
+                    type: 'category',
+                    data: []
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        data: [],
+                        type: 'bar'
+                    }
+                ]
+            };
+
+            $.ajax({
+                url: '/h1b/industry/chart/',
+                type: 'get',
+                dataType: 'json',
+                success: function (res) {
+                    //将后台返回的数据更新到option中
+                    if (res.status) {
+                        option.xAxis.data = res.series.year;
+                        option.series[0].data = res.series.data2;
+                        myChartWage.setOption(option);
+                    }
+                }
+            })
+            // 使用刚指定的配置项和数据显示图表。
+            window.addEventListener("resize", function () {
+                myChartWage.resize();
+            });
+        }
+
+    </script>
+   <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: "/get_naics_company/",
+                type: "post",
+                data: {},
+                usr: 2,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    var _data = []
+                    _data = data.data.map(item => {
+                        return {id: item.id, text: item.name}
+                    })
+                    mini.get('componentNaicsId').setData(_data)
+                }
+            });
+        });
+
+        mini.parse()
+        mini.get('componentNaicsId').on('valuechanged', function (e) {
+            // 基于准备好的dom，初始化echarts实例
+            console.log("eeeeeeeeeeeeeee=", e.selected.text)
+            var myChartCount = echarts.init(document.getElementById('chart_22'));
+            var myChartWage = echarts.init(document.getElementById('chart_33'));
+            const colors = ['#5470C6', '#EE6666'];
+            var optionCount;
+            var optionWage;
+            optionCount = {
+                xAxis: {
+                    type: 'category',
+                    data: [] //年
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        data: [],
+                        type: 'line',
+                        smooth: true
+                    }
+                ]
+            };
+            optionWage = {
+                xAxis: {
+                    type: 'category',
+                    data: []
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        data: [],
+                        type: 'bar'
+                    }
+                ]
+            };
+            $.ajax({
+                url: "/get_selected_naics/",
+                type: "post",
+                data: {selected: e.selected.text},
+                dataType: "JSON",
+                success: function (res) {
+                    //将后台返回的数据更新到option中
+                    if (res.status) {
+                        optionCount.xAxis.data = res.series.year;
+                        optionCount.series[0].data = res.series.data1;
+                        myChartCount.setOption(optionCount);
+                        // 使用刚指定的配置项和数据显示图表。
+                        window.addEventListener("resize", function () {
+                            myChartCount.resize();
+                        });
+                        optionWage.xAxis.data = res.series.year;
+                        optionWage.series[0].data = res.series.data2;
+                        myChartWage.setOption(optionWage);
+                        window.addEventListener("resize", function () {
+                            myChartWage.resize();
+                        });
+                    }
+                }
+            })
+        })
+    </script>
+{% endblock %}
